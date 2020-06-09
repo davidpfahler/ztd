@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
 import './App.css';
+import Tasks from './components/Tasks';
 
-function App() {
+const titles = {
+  inbox: 'Inbox',
+  mits: 'MITs',
+  bigrocks: 'Big Rocks',
+}
+
+export default function App () {
+  const [current, setCurrent] = useState('inbox');
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <header>{titles.inbox}</header>
+      <Tasks current={current} />
+      <nav>
+        <button 
+          className={current === 'mits' ? 'active' : ''}
+          onClick={() => setCurrent('mits')}>
+            {titles.mits}
+        </button>
+        <button
+          className={current === 'inbox' ? 'active' : ''}
+          onClick={() => setCurrent('inbox')}>
+            {titles.inbox}
+        </button>
+        <button
+          className={current === 'bigrocks' ? 'active' : ''}
+          onClick={() => setCurrent('bigrocks')}>
+            {titles.bigrocks}
+        </button>
+      </nav>
     </div>
   );
 }
-
-export default App;
