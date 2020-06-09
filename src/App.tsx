@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import './App.css';
-import Tasks from './components/Tasks';
+import Tasks, { TaskType } from './components/Tasks';
 
 const titles = {
   inbox: 'Inbox',
@@ -9,7 +9,7 @@ const titles = {
 }
 
 export default function App () {
-  const [current, setCurrent] = useState('inbox');
+  const [current, setCurrent] = useState<TaskType>('inbox');
   return (
     <div className="App">
       <header>{titles.inbox}</header>

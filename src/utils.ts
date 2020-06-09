@@ -1,4 +1,4 @@
-export const updateArray = (arr, el, newEl) => {
+export const updateArray = <T> (arr: T[], el: T, newEl: T): T[] => {
   if (!arr.includes(el)) {
     throw Error('Cannot update: Element not in array.');
   }

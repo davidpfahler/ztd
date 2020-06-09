@@ -1,54 +1,47 @@
-import React, {useState, FC} from 'react'
+import React, {useState, FC, useMemo, useRef} from 'react'
 import {updateArray} from '../utils'
 
-type Task = { title: string, done: boolean }
+export type TaskType = 'inbox' | 'mits' | 'bigrocks'
+
+type Task = {
+  title: string,
+  done: boolean,
+  type: TaskType,
+}
 
 const useTasks = () => {
-  const [inbox, setInbox] = useState<Task[]>([])
-  const [mits, setMits] = useState<Task[]>([])
-  const [bigrocks, setBigrocks] = useState<Task[]>([])
-  const addToInbox = (task: Task) => setInbox([...inbox, task])
-  const addToMits = (task: Task) => setInbox([...mits, task])
-  const addToBigrocks = (task: Task) => setInbox([...bigrocks, task])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const addTask = (task: Task): void => setTasks(tasks => [...tasks, task])
   const completeTask = (task: Task) => {
-    let i, arr, method
-    if (inbox.includes(task)) {
-      i = inbox.indexOf(task)
-      arr = inbox
-      method = setInbox
-    }
-    if (mits.includes(task)) {
-      i = mits.indexOf(task)
-      arr = mits
-      method = setMits
-    }
-    if (bigrocks.includes(task)) {
-      i = bigrocks.indexOf(task)
-      arr = bigrocks
-      method = setBigrocks
-    }
-    if (!method) {
-      throw Error('Cannot completet task: Unkown task.')
-    }
-    return method(updateArray(arr, task, {...task, done: true}))
+    return setTasks(updateArray<Task>(tasks, task, {...task, done: true}))
   }
 
+  const mits = useMemo(() => tasks.filter(task => task.type === 'mits'), [tasks])
+  const bigrocks = useMemo(() => tasks.filter(task => task.type === 'bigrocks'), [tasks])
+  const inbox = useMemo(() => tasks.filter(task => task.type === 'inbox'), [tasks])
   return {
-    inbox, mits, bigrocks, addToInbox, addToMits, addToBigrocks, completeTask
+    mits, bigrocks, inbox, addTask, completeTask
   }
 }
 
 type TasksComponentProps = {
-  current: string
+  current: TaskType
 }
 
 const TasksComponent: FC<TasksComponentProps> = ({current}) => {
-  const {addToInbox, addToMits, addToBigrocks, completeTask, ...rest} = useTasks();
+  const {addTask, completeTask, ...rest} = useTasks();
   const tasks: Task[] = rest[current]
+  const input = useRef<HTMLInputElement>(null);
   return <main>
-    <div className="addItem"><input type="text" /></div>
-    {tasks.map(task => {
-      return <div className="task">{task.title}</div>
+    <div className="addItem"><form onSubmit={e => {
+      if(!input.current) {
+        throw new Error('ref fail');
+      }
+      e.preventDefault();
+      addTask({title: input.current.value, done: false, type: current})
+    }}><input ref={input} type="text" /><input type="submit" hidden /></form></div>
+    {tasks.map((task, i) => {
+      return <div className="task" key={i}>{task.title}</div>
     })}
   </main>
 }
