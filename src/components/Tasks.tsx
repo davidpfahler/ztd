@@ -1,33 +1,42 @@
 import React, {useState, FC, useMemo, useRef} from 'react'
 import {updateArray} from '../utils'
 
-export type TaskType = 'inbox' | 'mits' | 'bigrocks'
+export enum TaskTypes {inbox, mits, bigrocks}
+export const taskTitles = ['Inbox', 'MITs', 'Big Rocks']
 
 type Task = {
   title: string,
   done: boolean,
-  type: TaskType,
+  type: TaskTypes,
+}
+type TaskFunction = (task: Task) => void
+type UseTasks = {
+  addTask: TaskFunction,
+  completeTask: TaskFunction,
+  [TaskTypes.mits]: Task[],
+  [TaskTypes.inbox]: Task[],
+  [TaskTypes.bigrocks]: Task[],
 }
 
-const useTasks = () => {
+const useTasks = (): UseTasks => {
   const [tasks, setTasks] = useState<Task[]>([])
-  const addTask = (task: Task): void => setTasks(tasks => [...tasks, task])
-  const completeTask = (task: Task) => {
-    return setTasks(updateArray<Task>(tasks, task, {...task, done: true}))
-  }
-
-  const mits = useMemo(() => tasks.filter(task => task.type === 'mits'), [tasks])
-  const bigrocks = useMemo(() => tasks.filter(task => task.type === 'bigrocks'), [tasks])
-  const inbox = useMemo(() => tasks.filter(task => task.type === 'inbox'), [tasks])
+  const addTask: TaskFunction = task => setTasks(tasks => [...tasks, task])
+  const completeTask: TaskFunction = task => setTasks(updateArray(tasks, task, {...task, done: true}))
+  const mits = useMemo(() => tasks.filter(task => task.type === TaskTypes.mits), [tasks])
+  const bigrocks = useMemo(() => tasks.filter(task => task.type === TaskTypes.bigrocks), [tasks])
+  const inbox = useMemo(() => tasks.filter(task => task.type === TaskTypes.inbox), [tasks])
   return {
-    mits, bigrocks, inbox, addTask, completeTask
+    addTask,
+    completeTask,
+    [TaskTypes.mits]: mits,
+    [TaskTypes.inbox]: inbox,
+    [TaskTypes.bigrocks]: bigrocks,
   }
 }
 
 type TasksComponentProps = {
-  current: TaskType
+  current: TaskTypes
 }
-
 const TasksComponent: FC<TasksComponentProps> = ({current}) => {
   const {addTask, completeTask, ...rest} = useTasks();
   const tasks: Task[] = rest[current]
